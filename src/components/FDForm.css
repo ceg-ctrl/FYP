@@ -1,0 +1,35 @@
+.reminder-box {
+  margin-top: 20px;
+  padding: 15px;
+  background-color: #e8f5e9; /* Light Green */
+  border: 1px solid #c8e6c9;
+  border-radius: 8px;
+  text-align: center;
+  animation: fadeIn 0.5s;
+}
+
+.reminder-box p {
+  margin: 0 0 10px 0;
+  color: #2e7d32;
+  font-weight: bold;
+}
+
+.calendar-btn {
+  display: inline-block;
+  background-color: #4285F4; /* Google Blue */
+  color: white;
+  text-decoration: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  font-weight: bold;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.calendar-btn:hover {
+  background-color: #357ae8;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
