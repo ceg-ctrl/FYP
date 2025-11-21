@@ -4,7 +4,7 @@ import FDForm from './components/FDForm';
 import FDList from './components/FDList';
 import SignIn from './components/SignIn';
 import DashboardSummary from './components/DashboardSummary';
-import NotificationManager from './components/NotificationManager';
+// REMOVED: NotificationManager import
 import { auth, db } from './firebase';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { collection, query, onSnapshot, orderBy, where } from 'firebase/firestore';
@@ -17,14 +17,10 @@ function App() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
-  // 1. FIXED: Handle Auth & Data Clearing Here
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
-      
       if (!currentUser) {
-        // If user logged out, we clear the data HERE.
-        // This avoids the "synchronous setState in effect" error.
         setFds([]); 
         setLoading(false);
       }
@@ -32,7 +28,6 @@ function App() {
     return () => unsubscribe();
   }, []);
 
-  // 2. FIXED: Data Fetching Effect (No 'else' block needed anymore)
   useEffect(() => {
     if (user) {
       const q = query(
@@ -50,7 +45,6 @@ function App() {
       });
       return () => unsubscribe();
     }
-    // The 'else' block is removed to fix the error.
   }, [user]);
 
   const handleLogout = () => {
@@ -70,7 +64,6 @@ function App() {
             <div className="header-content">
               <h1>FD Tracker</h1>
               
-              {/* User Menu Dropdown */}
               <div className="user-menu-container">
                 <button 
                   className="user-menu-btn" 
@@ -106,13 +99,11 @@ function App() {
                   </>
                 )}
               </div>
-              {/* END User Menu */}
-
             </div>
           </header>
 
           <main className="main-container">
-            <NotificationManager user={user} />
+            {/* REMOVED: <NotificationManager /> */}
 
             <div className="dashboard-controls">
               <DashboardSummary fds={fds} />
