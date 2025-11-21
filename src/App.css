@@ -1,33 +1,142 @@
-.App {
-  text-align: center;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  padding-bottom: 50px;
-}
+/* --- User Menu Styles --- */
 
-.app-header {
-  background-color: #282c34;
-  min-height: 80px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
-  margin-bottom: 30px;
+.user-menu-container {
   position: relative;
 }
 
-.logout-btn {
-  position: absolute;
-  right: 20px;
-  top: 25px;
-  background: transparent;
-  border: 1px solid white;
-  padding: 8px 15px;
-  font-size: 0.9rem;
-  width: auto;
+.user-menu-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: all 0.2s;
 }
 
-.logout-btn:hover {
-  background: rgba(255,255,255,0.2);
+.user-menu-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.user-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(255,255,255,0.5);
+}
+
+.user-initial {
+  width: 32px;
+  height: 32px;
+  background: #3b82f6;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 1rem;
+  border: 2px solid rgba(255,255,255,0.5);
+}
+
+.user-name-display {
+  font-size: 0.9rem;
+  font-weight: 500;
+  max-width: 120px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: none; /* Hide text on very small screens if needed */
+}
+
+@media (min-width: 600px) {
+  .user-name-display {
+    display: block;
+  }
+}
+
+.dropdown-arrow {
+  font-size: 0.7rem;
+  opacity: 0.7;
+}
+
+/* --- Dropdown Menu --- */
+
+.menu-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 99; /* Below dropdown, above everything else */
+  cursor: default;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 125%;
+  right: 0;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+  width: 240px;
+  overflow: hidden;
+  z-index: 100;
+  animation: fadeIn 0.2s ease-out;
+  border: 1px solid #f0f0f0;
+  text-align: left;
+}
+
+.dropdown-header {
+  padding: 16px;
+  background: #f8fafc;
+}
+
+.dropdown-user-name {
+  margin: 0;
+  font-weight: bold;
+  color: #1e293b;
+  font-size: 0.95rem;
+}
+
+.dropdown-user-email {
+  margin: 2px 0 0;
+  color: #64748b;
+  font-size: 0.8rem;
+  word-break: break-all;
+}
+
+.dropdown-divider {
+  height: 1px;
+  background-color: #e2e8f0;
+  margin: 0;
+}
+
+.dropdown-item {
+  width: 100%;
+  text-align: left;
+  padding: 12px 16px;
+  background: none;
+  border: none;
+  font-size: 0.95rem;
+  color: #334155;
+  cursor: pointer;
+  transition: background 0.1s;
+  display: block;
+}
+
+.dropdown-item:hover {
+  background-color: #f1f5f9;
+}
+
+.logout-item {
+  color: #ef4444;
+}
+
+.logout-item:hover {
+  background-color: #fef2f2;
 }

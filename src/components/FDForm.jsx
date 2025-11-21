@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { db } from '../firebase';
 import { collection, addDoc } from 'firebase/firestore';
-import { createGoogleCalendarLink } from '../utils/calendarHelper'; // Import helper
+import { createGoogleCalendarLink } from '../utils/calendarHelper'; 
 import './FDForm.css';
 
-const FDForm = ({ user }) => { // Receive user prop
+const FDForm = ({ user, onClose }) => { 
   const [formData, setFormData] = useState({
     bankName: '',
     principal: '',
@@ -13,7 +13,6 @@ const FDForm = ({ user }) => { // Receive user prop
     maturityDate: ''
   });
 
-  // State to hold the link for the LAST saved FD
   const [lastSavedFD, setLastSavedFD] = useState(null);
 
   const handleChange = (e) => {
@@ -25,9 +24,8 @@ const FDForm = ({ user }) => { // Receive user prop
     if(!formData.bankName || !formData.principal) return alert("Please fill required fields");
 
     try {
-      // 1. Save to Firebase
       await addDoc(collection(db, "fds"), {
-        userId: user.uid, // Important: Link to user
+        userId: user.uid,
         bankName: formData.bankName,
         principal: parseFloat(formData.principal),
         interestRate: parseFloat(formData.interestRate),
@@ -37,16 +35,13 @@ const FDForm = ({ user }) => { // Receive user prop
         createdAt: new Date()
       });
       
-      // 2. Prepare the Calendar Button
       setLastSavedFD({
         bankName: formData.bankName,
         principal: formData.principal,
         maturityDate: formData.maturityDate
       });
 
-      alert("FD Saved! Now set your reminder.");
-      
-      // Clear form (but keep lastSavedFD to show the button)
+      // Clear form
       setFormData({ bankName: '', principal: '', interestRate: '', startDate: '', maturityDate: '' });
 
     } catch (error) {
@@ -56,37 +51,40 @@ const FDForm = ({ user }) => { // Receive user prop
   };
 
   return (
-    <div className="form-container">
+    <div className="form-wrapper">
+      {/* Only show form if we haven't just saved one (or show both if you prefer) */}
       <form className="fd-form" onSubmit={handleSubmit}>
-        <h3>Add New Fixed Deposit</h3>
-        {/* ... (Keep your existing inputs same as before) ... */}
+        <h3 className="form-title">Add New Fixed Deposit</h3>
         
-        {/* Keep existing inputs for Bank, Principal, Rate, Dates */}
         <div className="form-group">
             <label>Bank Name</label>
-            <input type="text" name="bankName" value={formData.bankName} onChange={handleChange} required />
+            <input type="text" name="bankName" value={formData.bankName} onChange={handleChange} placeholder="e.g. Maybank" required />
         </div>
         <div className="form-group">
             <label>Principal (RM)</label>
-            <input type="number" name="principal" value={formData.principal} onChange={handleChange} required />
+            <input type="number" name="principal" value={formData.principal} onChange={handleChange} placeholder="10000" required />
         </div>
-        <div className="form-group">
-            <label>Interest Rate (%)</label>
-            <input type="number" step="0.01" name="interestRate" value={formData.interestRate} onChange={handleChange} required />
-        </div>
-        <div className="form-group">
-            <label>Start Date</label>
-            <input type="date" name="startDate" value={formData.startDate} onChange={handleChange} required />
+        <div className="form-row">
+          <div className="form-group half">
+              <label>Interest Rate (%)</label>
+              <input type="number" step="0.01" name="interestRate" value={formData.interestRate} onChange={handleChange} placeholder="3.5" required />
+          </div>
+          <div className="form-group half">
+              <label>Start Date</label>
+              <input type="date" name="startDate" value={formData.startDate} onChange={handleChange} required />
+          </div>
         </div>
         <div className="form-group">
             <label>Maturity Date</label>
             <input type="date" name="maturityDate" value={formData.maturityDate} onChange={handleChange} required />
         </div>
 
-        <button type="submit">Save FD</button>
+        <div className="form-actions">
+          <button type="button" className="btn-cancel" onClick={onClose}>Cancel</button>
+          <button type="submit" className="btn-save">Save FD</button>
+        </div>
       </form>
 
-      {/* --- NEW: The Reminder Button --- */}
       {lastSavedFD && (
         <div className="reminder-box">
           <p>✅ Saved! Don't forget to set a reminder:</p>

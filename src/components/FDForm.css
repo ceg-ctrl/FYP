@@ -1,35 +1,131 @@
+/* The container is now clean because it sits inside the Modal */
+.fd-form {
+  width: 100%;
+}
+
+.form-title {
+  margin-top: 0;
+  margin-bottom: 20px;
+  color: #1e293b;
+  font-size: 1.25rem;
+  text-align: center;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+/* Side-by-side inputs for Date/Rate */
+.form-row {
+  display: flex;
+  gap: 15px;
+}
+
+.form-group.half {
+  flex: 1;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: #4b5563;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  box-sizing: border-box;
+  font-size: 1rem;
+  transition: border-color 0.2s;
+}
+
+.form-group input:focus {
+  border-color: #2563eb;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+/* Button Group */
+.form-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 25px;
+}
+
+.btn-save {
+  flex: 2;
+  padding: 12px;
+  background-color: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-save:hover {
+  background-color: #1d4ed8;
+}
+
+.btn-cancel {
+  flex: 1;
+  padding: 12px;
+  background-color: #f1f5f9;
+  color: #64748b;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-cancel:hover {
+  background-color: #e2e8f0;
+  color: #475569;
+}
+
+/* Reminder Box (Kept your logic, polished slightly) */
 .reminder-box {
   margin-top: 20px;
   padding: 15px;
-  background-color: #e8f5e9; /* Light Green */
-  border: 1px solid #c8e6c9;
+  background-color: #ecfdf5; /* Softer green */
+  border: 1px solid #a7f3d0;
   border-radius: 8px;
   text-align: center;
   animation: fadeIn 0.5s;
 }
 
 .reminder-box p {
-  margin: 0 0 10px 0;
-  color: #2e7d32;
+  margin: 0 0 12px 0;
+  color: #059669;
   font-weight: bold;
+  font-size: 0.9rem;
 }
 
 .calendar-btn {
   display: inline-block;
-  background-color: #4285F4; /* Google Blue */
-  color: white;
+  background-color: #ffffff;
+  color: #2563eb;
+  border: 1px solid #2563eb;
   text-decoration: none;
-  padding: 10px 20px;
-  border-radius: 5px;
-  font-weight: bold;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: all 0.2s;
 }
 
 .calendar-btn:hover {
-  background-color: #357ae8;
+  background-color: #eff6ff;
+  transform: translateY(-1px);
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-10px); }
+  from { opacity: 0; transform: translateY(5px); }
   to { opacity: 1; transform: translateY(0); }
 }
