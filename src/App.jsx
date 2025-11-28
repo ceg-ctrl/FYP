@@ -4,7 +4,7 @@ import FDForm from './components/FDForm';
 import FDList from './components/FDList';
 import SignIn from './components/SignIn';
 import DashboardSummary from './components/DashboardSummary';
-// REMOVED: NotificationManager import
+import MarketRates from './components/MarketRates'; 
 import { auth, db } from './firebase';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { collection, query, onSnapshot, orderBy, where } from 'firebase/firestore';
@@ -14,9 +14,15 @@ function App() {
   const [fds, setFds] = useState([]);
   const [loading, setLoading] = useState(true);
   
+  // State for Modals
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  
+  // NEW: State for AI Scanner
+  const [isScannerOpen, setIsScannerOpen] = useState(false);
+  const [formInitialData, setFormInitialData] = useState(null);
 
+  // 1. Auth Listener
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
@@ -28,6 +34,7 @@ function App() {
     return () => unsubscribe();
   }, []);
 
+  // 2. Data Fetching
   useEffect(() => {
     if (user) {
       const q = query(
@@ -50,6 +57,13 @@ function App() {
   const handleLogout = () => {
     signOut(auth);
     setIsUserMenuOpen(false); 
+  };
+
+  // Handler when user clicks a rate in the AI Scanner
+  const handleSelectRate = (rateData) => {
+    setFormInitialData(rateData); // Save the data
+    setIsScannerOpen(false);      // Close the scanner modal
+    setIsFormOpen(true);          // Open the form modal immediately
   };
 
   if (loading) return <div className="loading-screen">Loading...</div>;
@@ -103,15 +117,23 @@ function App() {
           </header>
 
           <main className="main-container">
-            {/* REMOVED: <NotificationManager /> */}
-
+            
             <div className="dashboard-controls">
               <DashboardSummary fds={fds} />
               
               <div className="action-bar">
+                {/* Scan Rates Button */}
                 <button 
                   className="add-btn" 
-                  onClick={() => setIsFormOpen(true)}
+                  style={{ marginRight: '10px', backgroundColor: '#4f46e5' }} // Distinct color
+                  onClick={() => setIsScannerOpen(true)}
+                >
+                  🤖 Scan Rates
+                </button>
+
+                <button 
+                  className="add-btn" 
+                  onClick={() => { setFormInitialData(null); setIsFormOpen(true); }}
                 >
                   + New Deposit
                 </button>
@@ -120,11 +142,30 @@ function App() {
 
             <FDList fds={fds} />
 
+            {/* Market Rates Modal */}
+            {isScannerOpen && (
+              <div className="modal-overlay" onClick={() => setIsScannerOpen(false)}>
+                <div className="modal-content" onClick={e => e.stopPropagation()}>
+                  <button className="close-modal" onClick={() => setIsScannerOpen(false)}>×</button>
+                  <MarketRates 
+                    onClose={() => setIsScannerOpen(false)} 
+                    onSelectRate={handleSelectRate} 
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Existing Form Modal */}
             {isFormOpen && (
               <div className="modal-overlay" onClick={() => setIsFormOpen(false)}>
                 <div className="modal-content" onClick={e => e.stopPropagation()}>
                   <button className="close-modal" onClick={() => setIsFormOpen(false)}>×</button>
-                  <FDForm user={user} onClose={() => setIsFormOpen(false)} /> 
+                  {/* Pass the initialData prop here */}
+                  <FDForm 
+                    user={user} 
+                    onClose={() => setIsFormOpen(false)} 
+                    initialData={formInitialData} 
+                  /> 
                 </div>
               </div>
             )}

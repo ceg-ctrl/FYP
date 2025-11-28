@@ -1,0 +1,83 @@
+.market-rates-container h3 {
+  margin-top: 0;
+  text-align: center;
+  color: #1e293b;
+}
+
+.loading-state {
+  text-align: center;
+  padding: 20px;
+  color: #64748b;
+}
+
+/* Simple Spinner */
+.spinner {
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #2563eb;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 10px;
+}
+
+@keyframes spin { transform: rotate(360deg); }
+
+.rates-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 20px 0;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.rate-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: #fff;
+}
+
+.rate-card:hover {
+  border-color: #2563eb;
+  background-color: #eff6ff;
+  transform: translateX(5px);
+}
+
+.rate-header {
+  display: flex;
+  justify-content: space-between;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.rate-value {
+  color: #2563eb;
+  font-size: 1.1rem;
+}
+
+.rate-details {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+.promo-tag {
+  background: #f1f5f9;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+}
+
+.use-rate-btn {
+  display: none; /* Hidden by default, shown on hover logic via JS usually, or keep hidden and imply click */
+}
+
+.full-width {
+  width: 100%;
+  margin-top: 10px;
+}

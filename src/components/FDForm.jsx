@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { db } from '../firebase';
 import { collection, addDoc } from 'firebase/firestore';
 import { createGoogleCalendarLink } from '../utils/calendarHelper'; 
 import './FDForm.css';
 
-const FDForm = ({ user, onClose }) => { 
+const FDForm = ({ user, onClose, initialData }) => { 
   const [formData, setFormData] = useState({
     bankName: '',
     principal: '',
@@ -14,6 +14,32 @@ const FDForm = ({ user, onClose }) => {
   });
 
   const [lastSavedFD, setLastSavedFD] = useState(null);
+
+  // NEW: Effect to pre-fill data when 'initialData' prop changes (from AI)
+  useEffect(() => {
+    if (initialData) {
+      // Calculate a default maturity date (1 year from today)
+      const today = new Date();
+      // Safe way to add 1 year
+      const nextYear = new Date(today);
+      nextYear.setFullYear(today.getFullYear() + 1);
+
+      setFormData(prev => {
+        // Optimization: Only update if data is actually different to avoid loops
+        if (prev.bankName === initialData.bank && prev.interestRate === initialData.rate) {
+          return prev;
+        }
+        
+        return {
+          ...prev,
+          bankName: initialData.bank || '',
+          interestRate: initialData.rate || '',
+          startDate: today.toISOString().split('T')[0],
+          maturityDate: nextYear.toISOString().split('T')[0]
+        };
+      });
+    }
+  }, [initialData]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -41,7 +67,7 @@ const FDForm = ({ user, onClose }) => {
         maturityDate: formData.maturityDate
       });
 
-      // Clear form
+      // Clear form but keep the "Saved" state visible
       setFormData({ bankName: '', principal: '', interestRate: '', startDate: '', maturityDate: '' });
 
     } catch (error) {
