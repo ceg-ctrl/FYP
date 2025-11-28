@@ -20,13 +20,19 @@ const FDForm = ({ user, onClose, initialData }) => {
     if (initialData) {
       // Calculate a default maturity date (1 year from today)
       const today = new Date();
-      // Safe way to add 1 year
       const nextYear = new Date(today);
       nextYear.setFullYear(today.getFullYear() + 1);
 
+      const newStartDate = today.toISOString().split('T')[0];
+      const newMaturityDate = nextYear.toISOString().split('T')[0];
+
       setFormData(prev => {
-        // Optimization: Only update if data is actually different to avoid loops
-        if (prev.bankName === initialData.bank && prev.interestRate === initialData.rate) {
+        // Optimization: Check if values are actually different before updating
+        if (
+          prev.bankName === (initialData.bank || '') && 
+          prev.interestRate === (initialData.rate || '') &&
+          prev.startDate === newStartDate
+        ) {
           return prev;
         }
         
@@ -34,8 +40,8 @@ const FDForm = ({ user, onClose, initialData }) => {
           ...prev,
           bankName: initialData.bank || '',
           interestRate: initialData.rate || '',
-          startDate: today.toISOString().split('T')[0],
-          maturityDate: nextYear.toISOString().split('T')[0]
+          startDate: newStartDate,
+          maturityDate: newMaturityDate
         };
       });
     }

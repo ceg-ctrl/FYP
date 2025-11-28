@@ -21,7 +21,10 @@
   margin: 0 auto 10px;
 }
 
-@keyframes spin { transform: rotate(360deg); }
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
 
 .rates-list {
   display: flex;
@@ -73,8 +76,17 @@
   font-size: 0.75rem;
 }
 
+.error-msg {
+  color: #ef4444;
+  text-align: center;
+  background: #fef2f2;
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #fecaca;
+}
+
 .use-rate-btn {
-  display: none; /* Hidden by default, shown on hover logic via JS usually, or keep hidden and imply click */
+  display: none; 
 }
 
 .full-width {
