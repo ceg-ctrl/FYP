@@ -1,51 +1,52 @@
+/* src/components/DashboardSummary.css */
 .dashboard-summary {
   display: flex;
   gap: 20px;
   justify-content: center;
   flex-wrap: wrap;
   margin-bottom: 30px;
-  padding: 0 20px;
 }
 
 .summary-card {
-  background: white;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
   border-radius: 12px;
-  padding: 20px;
+  padding: 25px;
   min-width: 250px;
   flex: 1;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 6px -1px var(--shadow-color);
   text-align: center;
   transition: transform 0.2s;
 }
 
 .summary-card:hover {
-  transform: translateY(-5px);
+  transform: translateY(-2px);
 }
 
 .summary-card h3 {
   margin: 0;
-  color: #666;
-  font-size: 0.9rem;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
   text-transform: uppercase;
   letter-spacing: 1px;
 }
 
 .summary-card p {
   font-size: 2rem;
-  font-weight: bold;
+  font-weight: 700;
   margin: 10px 0;
-  color: #333;
+  color: var(--text-main);
 }
 
 .summary-card.total-interest p {
-  color: #28a745; /* Green for profit */
+  color: #10b981; /* Green */
 }
 
 .summary-card.total-principal p {
-  color: #007bff; /* Blue for Principal */
+  color: var(--primary); /* Blue */
 }
 
 .subtitle {
-  font-size: 0.8rem;
-  color: #999;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
 }

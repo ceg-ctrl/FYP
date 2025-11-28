@@ -49,6 +49,16 @@
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
+.form-group input {
+  background-color: var(--bg-input);
+  color: var(--text-main);
+  border-color: var(--border-color);
+}
+
+.form-title, .form-group label {
+  color: var(--text-main);
+}
+
 /* Button Group */
 .form-actions {
   display: flex;

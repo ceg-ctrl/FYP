@@ -1,137 +1,118 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { db } from '../firebase';
-import { collection, addDoc } from 'firebase/firestore';
-import { createGoogleCalendarLink } from '../utils/calendarHelper'; 
-import './FDForm.css';
+import { deleteDoc, doc } from 'firebase/firestore';
+import './FDList.css';
 
-const FDForm = ({ user, onClose, initialData }) => { 
-  const [formData, setFormData] = useState({
-    bankName: '',
-    principal: '',
-    interestRate: '',
-    startDate: '',
-    maturityDate: ''
-  });
+const FDList = ({ fds }) => {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortBy, setSortBy] = useState('maturityDate_asc');
 
-  const [lastSavedFD, setLastSavedFD] = useState(null);
-
-  // NEW: Effect to pre-fill data when 'initialData' prop changes (from AI)
-  useEffect(() => {
-    if (initialData) {
-      // Calculate a default maturity date (1 year from today)
-      const today = new Date();
-      const nextYear = new Date(today);
-      nextYear.setFullYear(today.getFullYear() + 1);
-
-      const newStartDate = today.toISOString().split('T')[0];
-      const newMaturityDate = nextYear.toISOString().split('T')[0];
-
-      setFormData(prev => {
-        // Optimization: Check if values are actually different before updating
-        if (
-          prev.bankName === (initialData.bank || '') && 
-          prev.interestRate === (initialData.rate || '') &&
-          prev.startDate === newStartDate
-        ) {
-          return prev;
-        }
-        
-        return {
-          ...prev,
-          bankName: initialData.bank || '',
-          interestRate: initialData.rate || '',
-          startDate: newStartDate,
-          maturityDate: newMaturityDate
-        };
-      });
+  const handleDelete = async (id) => {
+    if (window.confirm("Are you sure you want to delete this FD?")) {
+      await deleteDoc(doc(db, "fds", id));
     }
-  }, [initialData]);
-
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if(!formData.bankName || !formData.principal) return alert("Please fill required fields");
+  const calculateMaturityValue = (principal, rate, start, end) => {
+    const startDate = new Date(start);
+    const maturityDate = new Date(end);
+    const diffTime = Math.abs(maturityDate - startDate);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    const tenureYears = diffDays / 365;
+    const interest = principal * (rate / 100) * tenureYears;
+    return (principal + interest).toFixed(2);
+  };
 
-    try {
-      await addDoc(collection(db, "fds"), {
-        userId: user.uid,
-        bankName: formData.bankName,
-        principal: parseFloat(formData.principal),
-        interestRate: parseFloat(formData.interestRate),
-        startDate: formData.startDate,
-        maturityDate: formData.maturityDate,
-        status: 'active',
-        createdAt: new Date()
-      });
+  // Logic: Filter -> Sort
+  const processedFDs = useMemo(() => {
+    let result = [...fds];
+
+    // 1. Search
+    if (searchTerm) {
+      const lowerTerm = searchTerm.toLowerCase();
+      result = result.filter(fd => 
+        fd.bankName.toLowerCase().includes(lowerTerm) || 
+        fd.principal.toString().includes(lowerTerm)
+      );
+    }
+
+    // 2. Sort
+    result.sort((a, b) => {
+      const [field, direction] = sortBy.split('_');
       
-      setLastSavedFD({
-        bankName: formData.bankName,
-        principal: formData.principal,
-        maturityDate: formData.maturityDate
-      });
+      let valA = field === 'principal' || field === 'interestRate' ? parseFloat(a[field]) : new Date(a[field]);
+      let valB = field === 'principal' || field === 'interestRate' ? parseFloat(b[field]) : new Date(b[field]);
 
-      // Clear form but keep the "Saved" state visible
-      setFormData({ bankName: '', principal: '', interestRate: '', startDate: '', maturityDate: '' });
+      if (valA < valB) return direction === 'asc' ? -1 : 1;
+      if (valA > valB) return direction === 'asc' ? 1 : -1;
+      return 0;
+    });
 
-    } catch (error) {
-      console.error("Error adding document: ", error);
-      alert("Error saving data");
-    }
-  };
+    return result;
+  }, [fds, searchTerm, sortBy]);
 
   return (
-    <div className="form-wrapper">
-      {/* Only show form if we haven't just saved one (or show both if you prefer) */}
-      <form className="fd-form" onSubmit={handleSubmit}>
-        <h3 className="form-title">Add New Fixed Deposit</h3>
+    <div className="fd-list-container">
+      <h3>Your Portfolio ({processedFDs.length})</h3>
+      
+      {/* Search and Sort Controls */}
+      <div className="list-controls">
+        <input 
+          type="text" 
+          className="search-input" 
+          placeholder="🔍 Search bank or amount..." 
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
         
-        <div className="form-group">
-            <label>Bank Name</label>
-            <input type="text" name="bankName" value={formData.bankName} onChange={handleChange} placeholder="e.g. Maybank" required />
-        </div>
-        <div className="form-group">
-            <label>Principal (RM)</label>
-            <input type="number" name="principal" value={formData.principal} onChange={handleChange} placeholder="10000" required />
-        </div>
-        <div className="form-row">
-          <div className="form-group half">
-              <label>Interest Rate (%)</label>
-              <input type="number" step="0.01" name="interestRate" value={formData.interestRate} onChange={handleChange} placeholder="3.5" required />
-          </div>
-          <div className="form-group half">
-              <label>Start Date</label>
-              <input type="date" name="startDate" value={formData.startDate} onChange={handleChange} required />
-          </div>
-        </div>
-        <div className="form-group">
-            <label>Maturity Date</label>
-            <input type="date" name="maturityDate" value={formData.maturityDate} onChange={handleChange} required />
-        </div>
+        <select 
+          className="sort-select" 
+          value={sortBy} 
+          onChange={(e) => setSortBy(e.target.value)}
+        >
+          <option value="maturityDate_asc">Maturity (Earliest)</option>
+          <option value="maturityDate_desc">Maturity (Latest)</option>
+          <option value="principal_desc">Principal (High-Low)</option>
+          <option value="principal_asc">Principal (Low-High)</option>
+          <option value="interestRate_desc">Rate (High-Low)</option>
+        </select>
+      </div>
 
-        <div className="form-actions">
-          <button type="button" className="btn-cancel" onClick={onClose}>Cancel</button>
-          <button type="submit" className="btn-save">Save FD</button>
-        </div>
-      </form>
-
-      {lastSavedFD && (
-        <div className="reminder-box">
-          <p>✅ Saved! Don't forget to set a reminder:</p>
-          <a 
-            href={createGoogleCalendarLink(lastSavedFD)} 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="calendar-btn"
-          >
-            📅 Add to Google Calendar
-          </a>
+      {processedFDs.length === 0 ? (
+        <p style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>No matching Fixed Deposits found.</p>
+      ) : (
+        <div className="fd-grid">
+          {processedFDs.map((fd) => (
+            <div key={fd.id} className="fd-card">
+              <div className="card-header">
+                <span className="bank-name">{fd.bankName}</span>
+                <button className="delete-btn" onClick={() => handleDelete(fd.id)}>×</button>
+              </div>
+              <div className="card-body">
+                <div className="row">
+                  <span>Principal:</span>
+                  <strong>RM {fd.principal}</strong>
+                </div>
+                <div className="row">
+                  <span>Rate:</span>
+                  <strong>{fd.interestRate}%</strong>
+                </div>
+                <div className="row">
+                  <span>Matures:</span>
+                  <strong>{fd.maturityDate}</strong>
+                </div>
+                <hr />
+                <div className="row total">
+                  <span>Final Value:</span>
+                  <strong>RM {calculateMaturityValue(fd.principal, fd.interestRate, fd.startDate, fd.maturityDate)}</strong>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       )}
     </div>
   );
 };
 
-export default FDForm;
+export default FDList;
