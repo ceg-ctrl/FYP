@@ -24,44 +24,33 @@ exports.checkMaturingFDs = onSchedule({
   console.log("Checking FDs...");
 });
 
-// --- 2. MARKET RATES (Stable AI Estimate) ---
+// --- 2. MARKET RATES (Live Search + Manual Regex Parsing) ---
 exports.getMarketRates = onCall({ secrets: ["GEMINI_API_KEY"] }, async (request) => {
   if (!request.auth) {
     throw new HttpsError('unauthenticated', 'Please login.');
   }
 
   try {
-    console.log("Initializing Gemini 2.5 Flash (Standard Mode)...");
+    console.log("Initializing Gemini 2.5 Flash (Search Mode)...");
 
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
     
+    // Enable Search, DISABLE JSON Mode (to avoid 400 error)
     const model = genAI.getGenerativeModel({
       model: "gemini-2.5-flash",
-      generationConfig: {
-        responseMimeType: "application/json" 
-      }
+      tools: [{ googleSearch: {} }] 
     });
 
     const prompt = `
-      Act as a Malaysian financial analyst.
+      Search for "Current Fixed Deposit Rates in Malaysia for each bank" and specifically look for data matching the StashAway comparison table on https://www.stashaway.my/r/malaysia-fixed-deposit-rates.
       
       Task:
-      Generate a detailed list of CURRENT Fixed Deposit (FD) promotions in Malaysia.
-      Base this on your internal knowledge of standard market offerings from banks like Affin, Al Rajhi, Alliance, AmBank, Maybank, Bank Muamalat, Hong Leong, CIMB, MBSB, Public Bank, RHB, and Standard Chartered.
+      Extract a detailed list of ALL Fixed Deposit promotions found.
       
-      Output Requirements:
-      1. **Exact Columns**: 
-         - Bank Name
-         - Product Name (e.g. "eFD/eTD-i Promotion", "CASA Gold")
-         - Minimum Deposit (e.g. "RM10,000")
-         - Tenure (e.g. "12 months")
-         - Rate (Number, e.g. 3.85)
-         - Promo End Date (e.g. "31 Dec 2025")
+      Output Instructions:
+      Provide the data as a raw JSON array. Do not wrap it in markdown ticks.
       
-      2. **Granularity**: 
-         - If a bank has multiple tenures (3, 6, 12 months), list them as SEPARATE rows.
-      
-      Output Format (JSON Array):
+      Schema:
       [
         {
           "bank": "Bank Name",
@@ -75,7 +64,8 @@ exports.getMarketRates = onCall({ secrets: ["GEMINI_API_KEY"] }, async (request)
       
       Constraints:
       - 'rate' must be a Number.
-      - Sort by 'rate' descending.
+      - Sort by 'rate' descending (Highest first).
+      - Return ALL items found (aim for 20+).
     `;
 
     console.log("Sending prompt...");
@@ -83,26 +73,30 @@ exports.getMarketRates = onCall({ secrets: ["GEMINI_API_KEY"] }, async (request)
     const response = await result.response;
     const text = response.text();
     
-    console.log("AI Response received.");
+    console.log("AI Response (Snippet):", text.substring(0, 100));
+
+    // Manually extract JSON array using Regex
+    const jsonMatch = text.match(/\[\s*\{[\s\S]*\}\s*\]/);
     
-    // Clean up
-    const cleanJson = text.replace(/```json/g, "").replace(/```/g, "").trim();
+    if (!jsonMatch) {
+      throw new Error("No JSON array found in AI response.");
+    }
+
+    const cleanJson = jsonMatch[0];
     return JSON.parse(cleanJson);
 
   } catch (error) {
-    console.error("AI Failed, using Backup Data:", error);
+    console.error("AI Search Failed:", error);
     return getFallbackRates(); 
   }
 });
 
-// --- 3. STABLE BACKUP DATA (Matches StashAway exactly) ---
+// --- 3. DETAILED STATIC FALLBACK ---
 function getFallbackRates() {
-  console.log("Using StashAway Backup Data");
+  console.log("Using Detailed Fallback Data");
   return [
     { bank: "MBSB Bank", product: "Unit Trust Term Deposit-i", min_deposit: "RM20,000", tenure: "3 months", rate: 5.88, valid_until: "30 Nov 2025" },
     { bank: "BSN", product: "Term Deposit-i with SSP", min_deposit: "RM5,000", tenure: "6 months", rate: 5.15, valid_until: "31 Dec 2025" },
-    { bank: "Bank Muamalat", product: "Term Investment Account-i", min_deposit: "RM10,000", tenure: "12 months", rate: 4.00, valid_until: "31 Dec 2025" },
-    { bank: "RHB Bank", product: "CASA Gold Campaign", min_deposit: "RM500,000", tenure: "3 months", rate: 4.00, valid_until: "31 Dec 2025" }
-
+    { bank: "Bank Muamalat", product: "Term Investment Account-i", min_deposit: "RM10,000", tenure: "12 months", rate: 4.00, valid_until: "31 Dec 2025" }
   ];
-}
+} 
