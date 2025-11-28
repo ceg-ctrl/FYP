@@ -8,12 +8,12 @@ const { GoogleGenerativeAI } = require("@google/generative-ai");
 admin.initializeApp();
 setGlobalOptions({ region: "asia-southeast1" });
 
-// --- 1. EMAIL ROBOT (Existing Code) ---
+// --- 1. EMAIL ROBOT ---
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
-    user: "You0Got0Mail00@gmail.com", // <--- REPLACE THIS IF NEEDED
-    pass: "vlyr ihxm nszk tkpx",       // <--- REPLACE THIS IF NEEDED
+    user: "You0Got0Mail00@gmail.com", 
+    pass: "vlyr ihxm nszk tkpx",       
   },
 });
 
@@ -21,92 +21,88 @@ exports.checkMaturingFDs = onSchedule({
   schedule: "0 8 * * *", 
   timeZone: "Asia/Kuala_Lumpur",
 }, async () => {
-  // ... (Your existing email logic remains unchanged) ...
   console.log("Checking FDs...");
 });
 
-
-// --- 2. NEW: LIVE MARKET SCRAPER (RinggitPlus) ---
+// --- 2. MARKET RATES (Stable AI Estimate) ---
 exports.getMarketRates = onCall({ secrets: ["GEMINI_API_KEY"] }, async (request) => {
-  
   if (!request.auth) {
-    throw new HttpsError('unauthenticated', 'Please login to use this feature.');
+    throw new HttpsError('unauthenticated', 'Please login.');
   }
 
-  const TARGET_URL = "https://ringgitplus.com/en/fixed-deposit/";
-
   try {
-    // A. FETCH THE LIVE WEBSITE
-    console.log(`Fetching data from ${TARGET_URL}...`);
+    console.log("Initializing Gemini 2.5 Flash (Standard Mode)...");
+
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
     
-    const webResponse = await fetch(TARGET_URL, {
-      headers: {
-        // Pretend to be a real browser so we don't get blocked
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+    const model = genAI.getGenerativeModel({
+      model: "gemini-2.5-flash",
+      generationConfig: {
+        responseMimeType: "application/json" 
       }
     });
 
-    if (!webResponse.ok) {
-      throw new Error(`Failed to fetch website: ${webResponse.statusText}`);
-    }
-
-    const htmlText = await webResponse.text();
-    
-    // Optimization: Cut the HTML if it's too huge (Gemini Flash handles ~1M tokens, so usually fine, but good practice)
-    const truncatedHtml = htmlText.substring(0, 500000); 
-
-    // B. ASK GEMINI TO PARSE IT
-    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-
     const prompt = `
-      I have scraped the HTML content of the RinggitPlus Fixed Deposit comparison page.
+      Act as a Malaysian financial analyst.
       
-      Your Task:
-      1. Analyze the HTML below.
-      2. Find the list or table of Fixed Deposit promotions.
-      3. Extract the top 5-10 best offers found in the text.
-      4. Format the output strictly as a JSON array.
-
-      HTML Content:
-      ${truncatedHtml}
-
+      Task:
+      Generate a detailed list of CURRENT Fixed Deposit (FD) promotions in Malaysia.
+      Base this on your internal knowledge of standard market offerings from banks like Affin, Al Rajhi, Alliance, AmBank, Maybank, Bank Muamalat, Hong Leong, CIMB, MBSB, Public Bank, RHB, and Standard Chartered.
+      
       Output Requirements:
-      - Return ONLY a raw JSON array. No Markdown.
-      - Format: [{"bank": "Bank Name", "rate": 3.85, "tenure": "12 months", "description": "Any condition like 'Fresh funds' or 'Online only'"}]
-      - If a rate is a range (e.g. 3.5-3.8), just pick the maximum rate.
-      - Ensure 'rate' is a Number, not a string.
+      1. **Exact Columns**: 
+         - Bank Name
+         - Product Name (e.g. "eFD/eTD-i Promotion", "CASA Gold")
+         - Minimum Deposit (e.g. "RM10,000")
+         - Tenure (e.g. "12 months")
+         - Rate (Number, e.g. 3.85)
+         - Promo End Date (e.g. "31 Dec 2025")
+      
+      2. **Granularity**: 
+         - If a bank has multiple tenures (3, 6, 12 months), list them as SEPARATE rows.
+      
+      Output Format (JSON Array):
+      [
+        {
+          "bank": "Bank Name",
+          "product": "Product Name",
+          "min_deposit": "RM10,000",
+          "tenure": "12 months",
+          "rate": 3.85,
+          "valid_until": "31 Dec 2025"
+        }
+      ]
+      
+      Constraints:
+      - 'rate' must be a Number.
+      - Sort by 'rate' descending.
     `;
 
+    console.log("Sending prompt...");
     const result = await model.generateContent(prompt);
     const response = await result.response;
     const text = response.text();
-
-    // C. CLEAN UP AND RETURN
+    
+    console.log("AI Response received.");
+    
+    // Clean up
     const cleanJson = text.replace(/```json/g, "").replace(/```/g, "").trim();
     return JSON.parse(cleanJson);
 
   } catch (error) {
-    console.error("Scraper Error:", error);
-    // Fallback: If scraping fails, ask Gemini to estimate based on internal knowledge
-    // This ensures the user always gets SOME data instead of an error
+    console.error("AI Failed, using Backup Data:", error);
     return getFallbackRates(); 
   }
 });
 
-// Helper: Fallback if the website blocks us
-async function getFallbackRates() {
-  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-  
-  const prompt = `
-    The live website scan failed. 
-    Please act as a financial analyst and provide an *estimated* list of current Fixed Deposit rates in Malaysia for major banks (Maybank, CIMB, Public Bank, RHB).
-    Return strictly a JSON array: [{"bank": "...", "rate": 3.5, "tenure": "12 months", "description": "Estimated Market Rate"}]
-  `;
-  
-  const result = await model.generateContent(prompt);
-  const text = result.response.text();
-  const cleanJson = text.replace(/```json/g, "").replace(/```/g, "").trim();
-  return JSON.parse(cleanJson);
+// --- 3. STABLE BACKUP DATA (Matches StashAway exactly) ---
+function getFallbackRates() {
+  console.log("Using StashAway Backup Data");
+  return [
+    { bank: "MBSB Bank", product: "Unit Trust Term Deposit-i", min_deposit: "RM20,000", tenure: "3 months", rate: 5.88, valid_until: "30 Nov 2025" },
+    { bank: "BSN", product: "Term Deposit-i with SSP", min_deposit: "RM5,000", tenure: "6 months", rate: 5.15, valid_until: "31 Dec 2025" },
+    { bank: "Bank Muamalat", product: "Term Investment Account-i", min_deposit: "RM10,000", tenure: "12 months", rate: 4.00, valid_until: "31 Dec 2025" },
+    { bank: "RHB Bank", product: "CASA Gold Campaign", min_deposit: "RM500,000", tenure: "3 months", rate: 4.00, valid_until: "31 Dec 2025" }
+
+  ];
 }

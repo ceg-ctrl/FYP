@@ -1,24 +1,180 @@
+
+.market-rates-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;      
+  overflow: hidden;  
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 10px;
+  flex-shrink: 0; 
+  padding-right: 40px;
+}
+
 .market-rates-container h3 {
-  margin-top: 0;
-  text-align: center;
+  margin: 0;
+  text-align: left;
   color: #1e293b;
+  font-size: 1.2rem;
+}
+
+.sort-controls {
+  display: flex;
+  align-items: center;
+  font-size: 0.85rem;
+}
+
+.sort-controls select {
+  padding: 6px;
+  border-radius: 6px;
+  border: 1px solid #cbd5e1;
+  font-size: 0.85rem;
+  margin-left: 8px;
+  color: #334155;
+  background-color: #f8fafc;
+  cursor: pointer;
+}
+
+.rates-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow-y: auto; 
+  padding-right: 5px; 
+  flex-grow: 1;       
+  margin-bottom: 15px;
+}
+
+.rates-list::-webkit-scrollbar {
+  width: 6px;
+}
+.rates-list::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+.rates-list::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+.rates-list::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+.rate-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 15px;
+  background: #fff;
+  transition: transform 0.1s, box-shadow 0.1s, border-color 0.1s;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.rate-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1);
+  border-color: #2563eb;
+}
+
+.rate-main {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.bank-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.bank-name {
+  font-weight: 800;
+  color: #1e293b;
+  font-size: 1rem;
+}
+
+.product-name {
+  font-size: 0.8rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.rate-display {
+  text-align: right;
+  background: #eff6ff;
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid #dbeafe;
+  min-width: 60px;
+}
+
+.rate-value {
+  display: block;
+  font-weight: 800;
+  color: #2563eb;
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.rate-label {
+  font-size: 0.7rem;
+  color: #3b82f6;
+  font-weight: 600;
+}
+
+.rate-details-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  background: #f8fafc;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #f1f5f9;
+}
+
+.detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.detail-item .label {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  color: #94a3b8;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.detail-item .value {
+  font-size: 0.85rem;
+  color: #334155;
+  font-weight: 600;
 }
 
 .loading-state {
   text-align: center;
-  padding: 20px;
+  padding: 40px 20px;
   color: #64748b;
 }
 
-/* Simple Spinner */
 .spinner {
   border: 3px solid #f3f3f3;
   border-top: 3px solid #2563eb;
   border-radius: 50%;
-  width: 24px;
-  height: 24px;
+  width: 30px;
+  height: 30px;
   animation: spin 1s linear infinite;
-  margin: 0 auto 10px;
+  margin: 0 auto 15px;
 }
 
 @keyframes spin {
@@ -26,70 +182,30 @@
   to   { transform: rotate(360deg); }
 }
 
-.rates-list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin: 20px 0;
-  max-height: 400px;
-  overflow-y: auto;
-}
-
-.rate-card {
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  padding: 12px;
-  cursor: pointer;
-  transition: all 0.2s;
-  background: #fff;
-}
-
-.rate-card:hover {
-  border-color: #2563eb;
-  background-color: #eff6ff;
-  transform: translateX(5px);
-}
-
-.rate-header {
-  display: flex;
-  justify-content: space-between;
-  font-weight: bold;
-  margin-bottom: 5px;
-}
-
-.rate-value {
-  color: #2563eb;
-  font-size: 1.1rem;
-}
-
-.rate-details {
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.85rem;
-  color: #64748b;
-}
-
-.promo-tag {
-  background: #f1f5f9;
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-size: 0.75rem;
-}
-
 .error-msg {
   color: #ef4444;
   text-align: center;
   background: #fef2f2;
-  padding: 10px;
-  border-radius: 6px;
+  padding: 12px;
+  border-radius: 8px;
   border: 1px solid #fecaca;
+  font-size: 0.9rem;
 }
 
-.use-rate-btn {
-  display: none; 
-}
-
-.full-width {
+.btn-cancel {
   width: 100%;
-  margin-top: 10px;
+  padding: 12px;
+  background-color: #f1f5f9;
+  color: #64748b;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+  flex-shrink: 0; /* Ensure button stays at bottom */
+}
+
+.btn-cancel:hover {
+  background-color: #e2e8f0;
+  color: #475569;
 }

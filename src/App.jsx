@@ -42,14 +42,21 @@ function App() {
         where("userId", "==", user.uid),
         orderBy("maturityDate")
       );
-      const unsubscribe = onSnapshot(q, (querySnapshot) => {
-        const fdArray = [];
-        querySnapshot.forEach((doc) => {
-          fdArray.push({ ...doc.data(), id: doc.id });
-        });
-        setFds(fdArray);
-        setLoading(false);
-      });
+      const unsubscribe = onSnapshot(q, 
+        (querySnapshot) => {
+          const fdArray = [];
+          querySnapshot.forEach((doc) => {
+            fdArray.push({ ...doc.data(), id: doc.id });
+          });
+          setFds(fdArray);
+          setLoading(false);
+        },
+        (error) => {
+          console.error("Firestore Error:", error); // Check console for the Index Link!
+          alert("Error loading data: " + error.message);
+          setLoading(false); // Stop loading so the screen isn't stuck
+        }
+      );
       return () => unsubscribe();
     }
   }, [user]);
