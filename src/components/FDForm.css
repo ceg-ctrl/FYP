@@ -1,3 +1,5 @@
+/* src/components/FDForm.css */
+
 /* The container is now clean because it sits inside the Modal */
 .fd-form {
   width: 100%;
@@ -6,7 +8,7 @@
 .form-title {
   margin-top: 0;
   margin-bottom: 20px;
-  color: #1e293b;
+  color: var(--text-main); /* FIX: Use variable instead of fixed color */
   font-size: 1.25rem;
   text-align: center;
 }
@@ -30,33 +32,25 @@
   margin-bottom: 6px;
   font-weight: 600;
   font-size: 0.85rem;
-  color: #4b5563;
+  color: var(--text-secondary); /* FIX: Use variable */
 }
 
 .form-group input {
   width: 100%;
   padding: 10px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border-color); /* FIX: Use variable */
   border-radius: 6px;
   box-sizing: border-box;
   font-size: 1rem;
   transition: border-color 0.2s;
+  background-color: var(--bg-input); /* FIX: Adapt background */
+  color: var(--text-main);           /* FIX: Adapt text color */
 }
 
 .form-group input:focus {
-  border-color: #2563eb;
+  border-color: var(--primary);
   outline: none;
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-}
-
-.form-group input {
-  background-color: var(--bg-input);
-  color: var(--text-main);
-  border-color: var(--border-color);
-}
-
-.form-title, .form-group label {
-  color: var(--text-main);
 }
 
 /* Button Group */
@@ -69,7 +63,7 @@
 .btn-save {
   flex: 2;
   padding: 12px;
-  background-color: #2563eb;
+  background-color: var(--primary);
   color: white;
   border: none;
   border-radius: 6px;
@@ -79,14 +73,14 @@
 }
 
 .btn-save:hover {
-  background-color: #1d4ed8;
+  background-color: var(--primary-hover);
 }
 
 .btn-cancel {
   flex: 1;
   padding: 12px;
-  background-color: #f1f5f9;
-  color: #64748b;
+  background-color: var(--hover-bg);   /* FIX: Use variable */
+  color: var(--text-secondary);        /* FIX: Use variable */
   border: none;
   border-radius: 6px;
   font-weight: bold;
@@ -95,16 +89,16 @@
 }
 
 .btn-cancel:hover {
-  background-color: #e2e8f0;
-  color: #475569;
+  background-color: var(--border-color);
+  color: var(--text-main);
 }
 
-/* Reminder Box (Kept your logic, polished slightly) */
+/* Reminder Box */
 .reminder-box {
   margin-top: 20px;
   padding: 15px;
-  background-color: #ecfdf5; /* Softer green */
-  border: 1px solid #a7f3d0;
+  background-color: rgba(16, 185, 129, 0.1); /* Semi-transparent green */
+  border: 1px solid #059669;
   border-radius: 8px;
   text-align: center;
   animation: fadeIn 0.5s;
@@ -112,16 +106,16 @@
 
 .reminder-box p {
   margin: 0 0 12px 0;
-  color: #059669;
+  color: #10b981;
   font-weight: bold;
   font-size: 0.9rem;
 }
 
 .calendar-btn {
   display: inline-block;
-  background-color: #ffffff;
-  color: #2563eb;
-  border: 1px solid #2563eb;
+  background-color: var(--bg-card); /* FIX: Use variable */
+  color: var(--primary);
+  border: 1px solid var(--primary);
   text-decoration: none;
   padding: 8px 16px;
   border-radius: 6px;
@@ -131,7 +125,7 @@
 }
 
 .calendar-btn:hover {
-  background-color: #eff6ff;
+  background-color: var(--hover-bg);
   transform: translateY(-1px);
 }
 

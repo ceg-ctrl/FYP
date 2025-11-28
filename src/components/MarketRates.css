@@ -1,9 +1,11 @@
+/* src/components/MarketRates.css */
 
 .market-rates-container {
   display: flex;
   flex-direction: column;
   height: 100%;      
-  overflow: hidden;  
+  overflow: hidden;
+  color: var(--text-main); /* FIX */
 }
 
 .modal-header {
@@ -11,7 +13,7 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 15px;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--border-color); /* FIX */
   padding-bottom: 10px;
   flex-shrink: 0; 
   padding-right: 40px;
@@ -20,7 +22,7 @@
 .market-rates-container h3 {
   margin: 0;
   text-align: left;
-  color: #1e293b;
+  color: var(--text-main); /* FIX */
   font-size: 1.2rem;
 }
 
@@ -33,11 +35,11 @@
 .sort-controls select {
   padding: 6px;
   border-radius: 6px;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--border-color); /* FIX */
   font-size: 0.85rem;
   margin-left: 8px;
-  color: #334155;
-  background-color: #f8fafc;
+  color: var(--text-main);       /* FIX */
+  background-color: var(--bg-input); /* FIX */
   cursor: pointer;
 }
 
@@ -55,22 +57,18 @@
   width: 6px;
 }
 .rates-list::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 3px;
+  background: transparent;
 }
 .rates-list::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: var(--border-color);
   border-radius: 3px;
-}
-.rates-list::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
 }
 
 .rate-card {
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border-color); /* FIX */
   border-radius: 10px;
   padding: 15px;
-  background: #fff;
+  background: var(--bg-card); /* FIX */
   transition: transform 0.1s, box-shadow 0.1s, border-color 0.1s;
   cursor: pointer;
   display: flex;
@@ -80,8 +78,8 @@
 
 .rate-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1);
-  border-color: #2563eb;
+  box-shadow: 0 4px 12px var(--shadow-color);
+  border-color: var(--primary);
 }
 
 .rate-main {
@@ -98,36 +96,36 @@
 
 .bank-name {
   font-weight: 800;
-  color: #1e293b;
+  color: var(--text-main); /* FIX */
   font-size: 1rem;
 }
 
 .product-name {
   font-size: 0.8rem;
-  color: #64748b;
+  color: var(--text-secondary); /* FIX */
   font-weight: 500;
 }
 
 .rate-display {
   text-align: right;
-  background: #eff6ff;
+  background: rgba(37, 99, 235, 0.1); /* FIX: Transparent blue */
   padding: 6px 10px;
   border-radius: 8px;
-  border: 1px solid #dbeafe;
+  border: 1px solid var(--primary);
   min-width: 60px;
 }
 
 .rate-value {
   display: block;
   font-weight: 800;
-  color: #2563eb;
+  color: var(--primary);
   font-size: 1.25rem;
   line-height: 1;
 }
 
 .rate-label {
   font-size: 0.7rem;
-  color: #3b82f6;
+  color: var(--primary);
   font-weight: 600;
 }
 
@@ -135,10 +133,10 @@
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 8px;
-  background: #f8fafc;
+  background: var(--hover-bg); /* FIX */
   padding: 10px;
   border-radius: 8px;
-  border: 1px solid #f1f5f9;
+  border: 1px solid var(--border-color); /* FIX */
 }
 
 .detail-item {
@@ -150,26 +148,26 @@
 .detail-item .label {
   font-size: 0.65rem;
   text-transform: uppercase;
-  color: #94a3b8;
+  color: var(--text-secondary); /* FIX */
   font-weight: 700;
   letter-spacing: 0.5px;
 }
 
 .detail-item .value {
   font-size: 0.85rem;
-  color: #334155;
+  color: var(--text-main); /* FIX */
   font-weight: 600;
 }
 
 .loading-state {
   text-align: center;
   padding: 40px 20px;
-  color: #64748b;
+  color: var(--text-secondary);
 }
 
 .spinner {
-  border: 3px solid #f3f3f3;
-  border-top: 3px solid #2563eb;
+  border: 3px solid var(--border-color);
+  border-top: 3px solid var(--primary);
   border-radius: 50%;
   width: 30px;
   height: 30px;
@@ -185,27 +183,27 @@
 .error-msg {
   color: #ef4444;
   text-align: center;
-  background: #fef2f2;
+  background: rgba(239, 68, 68, 0.1);
   padding: 12px;
   border-radius: 8px;
-  border: 1px solid #fecaca;
+  border: 1px solid #ef4444;
   font-size: 0.9rem;
 }
 
 .btn-cancel {
   width: 100%;
   padding: 12px;
-  background-color: #f1f5f9;
-  color: #64748b;
+  background-color: var(--hover-bg); /* FIX */
+  color: var(--text-secondary);      /* FIX */
   border: none;
   border-radius: 8px;
   font-weight: 600;
   cursor: pointer;
   transition: background 0.2s;
-  flex-shrink: 0; /* Ensure button stays at bottom */
+  flex-shrink: 0; 
 }
 
 .btn-cancel:hover {
-  background-color: #e2e8f0;
-  color: #475569;
+  background-color: var(--border-color);
+  color: var(--text-main);
 }
