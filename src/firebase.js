@@ -5,14 +5,13 @@ import { getAuth, GoogleAuthProvider } from "firebase/auth";
 import { getFunctions } from "firebase/functions"; // <--- 1. Import this
 
 const firebaseConfig = {
-  // ... KEEP YOUR EXISTING KEYS ...
-  apiKey: "...",
-  authDomain: "...",
-  projectId: "...",
-  storageBucket: "...",
-  messagingSenderId: "...",
-  appId: "...",
-  measurementId: "..."
+  apiKey: "AIzaSyCr0T_iUtBZWucohKddC40m9Ku-f1-DimI",
+  authDomain: "fyp-fd-tracker-b4602.firebaseapp.com",
+  projectId: "fyp-fd-tracker-b4602",
+  storageBucket: "fyp-fd-tracker-b4602.firebasestorage.app",
+  messagingSenderId: "774525267132",
+  appId: "1:774525267132:web:1ab55b18f906705d1334b9",
+  measurementId: "G-FW89E0ZHND"
 };
 
 const app = initializeApp(firebaseConfig);
