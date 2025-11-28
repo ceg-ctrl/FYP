@@ -6,7 +6,7 @@ import reactRefresh from 'eslint-plugin-react-refresh'
 
 export default [
   { 
-    ignores: ['dist', 'functions/**'] // <--- ADD functions/** HERE
+    ignores: ['dist', 'functions/**'] 
   },
   {
     files: ['**/*.{js,jsx}'],
