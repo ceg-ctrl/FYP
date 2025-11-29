@@ -1,6 +1,7 @@
 const { onSchedule } = require("firebase-functions/v2/scheduler");
 const { onCall, HttpsError } = require("firebase-functions/v2/https");
 const { setGlobalOptions } = require("firebase-functions/v2");
+const { defineSecret } = require("firebase-functions/params"); // 1. Import defineSecret
 const admin = require("firebase-admin");
 const nodemailer = require("nodemailer");
 const { GoogleGenerativeAI } = require("@google/generative-ai");
@@ -8,20 +9,73 @@ const { GoogleGenerativeAI } = require("@google/generative-ai");
 admin.initializeApp();
 setGlobalOptions({ region: "asia-southeast1" });
 
-// --- 1. EMAIL ROBOT ---
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: "You0Got0Mail00@gmail.com", 
-    pass: "vlyr ihxm nszk tkpx",       
-  },
-});
+// 2. Define the secret key
+const gmailPass = defineSecret("GMAIL_PASS");
 
 exports.checkMaturingFDs = onSchedule({
   schedule: "0 8 * * *", 
   timeZone: "Asia/Kuala_Lumpur",
+  secrets: [gmailPass], // 3. Allow this function to access the secret
 }, async () => {
   console.log("Checking FDs...");
+  
+  try {
+    // 4. Initialize transporter INSIDE the function to access the secret value
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: "You0Got0Mail00@gmail.com", 
+        pass: gmailPass.value(), // 5. Access the secure value
+      },
+    });
+
+    // 1. Get today's date in YYYY-MM-DD format (Match your FDForm format)
+    const today = new Date();
+    // Adjust for Malaysia time if server is UTC
+    today.setHours(today.getHours() + 8); 
+    const todayStr = today.toISOString().split('T')[0];
+
+    // 2. Query Firestore for FDs maturing today
+    const snapshot = await admin.firestore().collection('fds')
+      .where('maturityDate', '==', todayStr)
+      .where('status', '==', 'active')
+      .get();
+
+    if (snapshot.empty) {
+      console.log('No FDs maturing today.');
+      return;
+    }
+
+    // 3. Loop through results and send emails
+    const emailPromises = snapshot.docs.map(async (doc) => {
+      const fd = doc.data();
+      
+      // Get user email from Auth using userId stored in FD document
+      try {
+        const userRecord = await admin.auth().getUser(fd.userId);
+        const userEmail = userRecord.email;
+
+        if (userEmail) {
+          const mailOptions = {
+            from: '"FD Tracker Robot" <You0Got0Mail00@gmail.com>',
+            to: userEmail,
+            subject: `💰 FD Maturity Alert: ${fd.bankName}`,
+            text: `Your Fixed Deposit of RM ${fd.principal} at ${fd.bankName} matures today (${fd.maturityDate}). Please check your FD Tracker app.`
+          };
+
+          return transporter.sendMail(mailOptions);
+        }
+      } catch (err) {
+        console.error(`Failed to fetch user or send email for doc ${doc.id}:`, err);
+      }
+    });
+
+    await Promise.all(emailPromises);
+    console.log(`Sent emails for ${snapshot.size} maturing FDs.`);
+
+  } catch (error) {
+    console.error("Error in checkMaturingFDs:", error);
+  }
 });
 
 // --- 2. MARKET RATES (Live Search + Manual Regex Parsing) ---
@@ -99,4 +153,4 @@ function getFallbackRates() {
     { bank: "BSN", product: "Term Deposit-i with SSP", min_deposit: "RM5,000", tenure: "6 months", rate: 5.15, valid_until: "31 Dec 2025" },
     { bank: "Bank Muamalat", product: "Term Investment Account-i", min_deposit: "RM10,000", tenure: "12 months", rate: 4.00, valid_until: "31 Dec 2025" }
   ];
-} 
+}
